@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>VisionLabel · UI 布局设计稿</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+  html,body { height:100%; background:#1e1f24; font-family:"Segoe UI","Microsoft YaHei",sans-serif; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .window { width:1400px; height:860px; background:#f5f5f5; border-radius:10px; overflow:hidden;
+            box-shadow:0 24px 80px rgba(0,0,0,.55); display:flex; flex-direction:column; transform-origin:center; }
+
+  /* ===== 标题栏 ===== */
+  .titlebar { height:34px; background:#2d2e33; color:#ddd; display:flex; align-items:center; padding:0 12px; font-size:12.5px; flex:none; }
+  .titlebar .logo { width:16px; height:16px; border-radius:4px; background:linear-gradient(135deg,#4f8cff,#7b5cff); margin-right:8px; }
+  .titlebar .wintitle { color:#cfd2d8; }
+  .titlebar .wintitle b { color:#fff; font-weight:600; }
+  .titlebar .winbtns { margin-left:auto; display:flex; gap:14px; color:#9a9da5; font-size:13px; }
+
+  /* ===== 菜单栏 ===== */
+  .menubar { height:30px; background:#ececec; border-bottom:1px solid #dcdcdc; display:flex; align-items:center; padding:0 8px; font-size:12.5px; color:#333; flex:none; }
+  .menubar span { padding:4px 10px; border-radius:4px; }
+  .menubar span:hover { background:#dbeafe; }
+
+  /* ===== 顶部工具栏 ===== */
+  .toolbar { height:44px; background:#f7f7f7; border-bottom:1px solid #ddd; display:flex; align-items:center; padding:0 10px; gap:4px; flex:none; }
+  .tbtn { display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:6px; font-size:12.5px; color:#333; }
+  .tbtn:hover { background:#e5eefc; }
+  .tbtn .ic { font-size:15px; }
+  .tsep { width:1px; height:24px; background:#d5d5d5; margin:0 8px; }
+  .tbtn.ai { margin-left:auto; background:linear-gradient(135deg,#eef2ff,#f5f0ff); border:1px solid #d8d0f5; color:#5b4bb3; font-weight:600; }
+
+  /* ===== 主体 ===== */
+  .main { flex:1; display:flex; min-height:0; }
+
+  /* 左侧模式条 */
+  .modestrip { width:76px; background:#f0f0f0; border-right:1px solid #ddd; display:flex; flex-direction:column; align-items:center; padding-top:8px; gap:4px; flex:none; }
+  .modebtn { width:62px; height:56px; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:#444; cursor:pointer; position:relative; }
+  .modebtn .micon { font-size:19px; line-height:1; }
+  .modebtn .mlabel { font-size:10.5px; }
+  .modebtn .mkey { position:absolute; top:3px; right:5px; font-size:9px; color:#999; }
+  .modebtn:hover { background:#e3ecfa; }
+  .modebtn.active { background:#d3e3fd; box-shadow:inset 0 0 0 1.5px #4f8cff; color:#1a56c4; }
+  .modebtn.active .mkey { color:#4f8cff; }
+  .modestrip .future { margin-top:6px; border-top:1px dashed #ccc; padding-top:8px; width:100%; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .modebtn.ghost { color:#a8a8a8; border:1px dashed #d0d0d0; background:#fafafa; }
+
+  /* 中央区域：画布 + 画布控制条 */
+  .center-col { flex:1; display:flex; flex-direction:column; min-width:0; }
+  .canvas-wrap { flex:1; background:#38393e; position:relative; overflow:hidden; min-width:0; min-height:0;
+                 background-image:radial-gradient(circle at 1px 1px, #44454b 1px, transparent 0); background-size:24px 24px; }
+  /* 画布下方控制条：翻页 + 缩放 */
+  .canvas-bar { height:42px; background:#2e2f34; border-top:1px solid #24252a; display:flex; align-items:center; justify-content:center; gap:6px; flex:none; }
+  .cbtn { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:6px; font-size:12.5px; color:#cfd2d8; }
+  .cbtn:hover { background:#3d3f46; }
+  .csep { width:1px; height:22px; background:#4a4b52; margin:0 8px; }
+  .page-ind { color:#9a9da5; font-size:12.5px; font-family:Consolas,monospace; padding:0 6px; }
+  .page-ind b { color:#fff; }
+  .zoom-val { color:#fff; font-size:12.5px; font-family:Consolas,monospace; min-width:44px; text-align:center; }
+  .kbd { color:#999; font-size:11px; }
+  .kbd2 { color:#8a8d95; font-size:10.5px; }
+  .image-stage { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:760px; height:520px;
+                 box-shadow:0 8px 40px rgba(0,0,0,.5); }
+  .image-stage svg { display:block; width:100%; height:100%; }
+  /* 十字光标 */
+  .crosshair-h, .crosshair-v { position:absolute; background:rgba(80,200,255,.55); pointer-events:none; z-index:5; }
+  .crosshair-h { left:0; right:0; top:41%; height:1px; }
+  .crosshair-v { top:0; bottom:0; left:47%; width:1px; }
+  .coord-tip { position:absolute; left:calc(47% + 10px); top:calc(41% + 8px); background:rgba(20,20,24,.85); color:#7fd8ff;
+               font-size:11px; padding:3px 8px; border-radius:4px; z-index:6; font-family:Consolas,monospace; }
+  .canvas-badge { position:absolute; left:12px; top:10px; background:rgba(20,20,24,.75); color:#bbb; font-size:11.5px;
+                  padding:5px 10px; border-radius:6px; z-index:6; }
+  .canvas-badge b { color:#fff; }
+
+  /* 右侧面板 */
+  .rightdock { width:296px; background:#f4f4f4; border-left:1px solid #ddd; display:flex; flex-direction:column; flex:none; }
+  .dock { border-bottom:1px solid #e0e0e0; display:flex; flex-direction:column; min-height:0; }
+  .dock-head { height:30px; background:#ececec; display:flex; align-items:center; padding:0 10px; font-size:12px; font-weight:600; color:#444; flex:none; }
+  .dock-head .mini { margin-left:auto; color:#999; font-weight:400; font-size:11px; }
+  .dock-body { overflow:hidden; padding:6px 8px; }
+
+  /* 类别列表 */
+  .cls-item { display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:6px; font-size:12.5px; color:#333; }
+  .cls-item:hover { background:#e9f0fb; }
+  .cls-item.sel { background:#d3e3fd; box-shadow:inset 0 0 0 1.5px #4f8cff; }
+  .cls-item .key { width:18px; height:18px; border-radius:4px; background:#ececec; border:1px solid #ccc; font-size:10px;
+                   display:flex; align-items:center; justify-content:center; color:#666; font-family:Consolas,monospace; }
+  .cls-item .dot { width:12px; height:12px; border-radius:3px; }
+  .cls-item .cnt { margin-left:auto; font-size:11px; color:#999; }
+
+  /* 标注对象列表 */
+  .obj-item { display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:6px; font-size:12.5px; color:#333; }
+  .obj-item:hover { background:#e9f0fb; }
+  .obj-item.sel { background:#ffe9d6; box-shadow:inset 0 0 0 1.5px #f0883e; }
+  .obj-item .type { font-size:13px; width:18px; text-align:center; }
+  .obj-item .dot { width:10px; height:10px; border-radius:50%; }
+  .obj-item .eye { margin-left:auto; color:#888; font-size:12px; }
+
+  /* 属性面板 */
+  .prop-grid { display:grid; grid-template-columns:64px 1fr; gap:6px 8px; font-size:12px; color:#444; align-items:center; padding:2px 4px; }
+  .prop-grid .v { background:#fff; border:1px solid #ddd; border-radius:4px; padding:3px 8px; color:#222; font-family:Consolas,monospace; font-size:11.5px; }
+
+  /* 文件列表 */
+  .file-item { display:flex; align-items:center; gap:8px; padding:4px 8px; border-radius:6px; font-size:12px; color:#333; }
+  .file-item:hover { background:#e9f0fb; }
+  .file-item.cur { background:#d3e3fd; }
+  .file-item .thumb { width:30px; height:22px; border-radius:3px; flex:none; }
+  .file-item .st { margin-left:auto; font-size:11px; }
+  .st.done { color:#1a9e54; } .st.todo { color:#b0b0b0; } .st.wip { color:#d9822b; }
+
+  /* 状态栏 */
+  .statusbar { height:26px; background:#ececec; border-top:1px solid #dcdcdc; display:flex; align-items:center;
+               padding:0 12px; font-size:11.5px; color:#555; gap:18px; flex:none; }
+  .statusbar .prog { margin-left:auto; display:flex; align-items:center; gap:8px; }
+  .progbar { width:120px; height:6px; background:#d8d8d8; border-radius:3px; overflow:hidden; }
+  .progbar i { display:block; height:100%; width:38%; background:linear-gradient(90deg,#4f8cff,#6aa5ff); border-radius:3px; }
+  .hint { color:#1a56c4; }
+</style>
+</head>
+<body>
+<div class="window" id="win">
+
+  <!-- 标题栏 -->
+  <div class="titlebar">
+    <div class="logo"></div>
+    <div class="wintitle"><b>VisionLabel</b> — street_scene 项目 · 未保存的更改 ●</div>
+    <div class="winbtns"><span>—</span><span>▢</span><span>✕</span></div>
+  </div>
+
+  <!-- 菜单栏 -->
+  <div class="menubar">
+    <span>文件(F)</span><span>编辑(E)</span><span>视图(V)</span><span>标注(A)</span><span>工具(T)</span><span>帮助(H)</span>
+  </div>
+
+  <!-- 顶部工具栏：高频标注工具 -->
+  <div class="toolbar">
+    <div class="tbtn"><span class="ic">📂</span>打开文件夹</div>
+    <div class="tbtn"><span class="ic">💾</span>保存 <span class="kbd">Ctrl+S</span></div>
+    <div class="tsep"></div>
+    <div class="tbtn"><span class="ic">↩</span>撤销 <span class="kbd">Ctrl+Z</span></div>
+    <div class="tbtn"><span class="ic">↪</span>重做 <span class="kbd">Ctrl+Y</span></div>
+    <div class="tsep"></div>
+    <div class="tbtn"><span class="ic">⧉</span>复制标注 <span class="kbd">Ctrl+D</span></div>
+    <div class="tbtn"><span class="ic">🗑</span>删除 <span class="kbd">Del</span></div>
+    <div class="tsep"></div>
+    <div class="tbtn"><span class="ic">👁</span>显隐标注 <span class="kbd">Ctrl+H</span></div>
+    <div class="tbtn"><span class="ic">✔</span>校验</div>
+    <div class="tbtn ai"><span class="ic">✨</span>AI 预标注</div>
+  </div>
+
+  <div class="main">
+    <!-- 左侧标注模式条（插件式，可扩展） -->
+    <div class="modestrip">
+      <div class="modebtn"><span class="mkey">V</span><span class="micon">🖱</span><span class="mlabel">选择/编辑</span></div>
+      <div class="modebtn active"><span class="mkey">R</span><span class="micon">▭</span><span class="mlabel">矩形框</span></div>
+      <div class="modebtn"><span class="mkey">P</span><span class="micon">⬠</span><span class="mlabel">多边形</span></div>
+      <div class="modebtn"><span class="mkey">K</span><span class="micon">✚</span><span class="mlabel">关键点</span></div>
+      <div class="future">
+        <div class="modebtn ghost"><span class="micon">🖌</span><span class="mlabel">画笔</span></div>
+        <div class="modebtn ghost"><span class="micon">／</span><span class="mlabel">线段</span></div>
+        <div class="modebtn ghost"><span class="micon">＋</span><span class="mlabel">插件扩展</span></div>
+      </div>
+    </div>
+
+    <!-- 中央区域：画布 + 画布控制条 -->
+    <div class="center-col">
+    <div class="canvas-wrap">
+      <div class="canvas-badge">当前模式：<b>矩形框</b> · 拖拽绘制，<b>Esc</b> 取消</div>
+      <div class="image-stage">
+        <svg viewBox="0 0 760 520" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#8fb6d9"/><stop offset="0.55" stop-color="#c8d4d2"/><stop offset="1" stop-color="#9aa38f"/>
+            </linearGradient>
+            <linearGradient id="road" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#7d7f78"/><stop offset="1" stop-color="#5d5f5a"/>
+            </linearGradient>
+          </defs>
+          <!-- 模拟街景图片 -->
+          <rect width="760" height="520" fill="url(#sky)"/>
+          <rect y="330" width="760" height="190" fill="url(#road)"/>
+          <rect x="0" y="300" width="760" height="34" fill="#a9a491"/>
+          <g fill="#6f7d68"><rect x="40" y="180" width="90" height="130" rx="4"/><rect x="600" y="150" width="110" height="160" rx="4"/></g>
+          <g fill="#8a957f"><rect x="150" y="210" width="70" height="100" rx="4"/><rect x="520" y="200" width="70" height="110" rx="4"/></g>
+          <ellipse cx="380" cy="255" rx="60" ry="70" fill="#77896b"/>
+          <rect x="374" y="300" width="12" height="40" fill="#6b5d4f"/>
+          <line x1="0" y1="420" x2="760" y2="400" stroke="#e8e4c8" stroke-width="5" stroke-dasharray="28 20" opacity=".8"/>
+
+          <!-- 标注1：矩形框 person -->
+          <g>
+            <rect x="250" y="215" width="86" height="170" fill="rgba(255,77,79,0.08)" stroke="#ff4d4f" stroke-width="2.5"/>
+            <rect x="250" y="195" width="96" height="20" fill="#ff4d4f"/>
+            <text x="256" y="209" font-size="12" fill="#fff" font-family="Segoe UI">person</text>
+            <circle cx="250" cy="215" r="4" fill="#fff" stroke="#ff4d4f" stroke-width="2"/>
+            <circle cx="336" cy="385" r="4" fill="#fff" stroke="#ff4d4f" stroke-width="2"/>
+            <!-- 人形示意 -->
+            <circle cx="293" cy="245" r="14" fill="#4a4038"/>
+            <rect x="278" y="258" width="30" height="70" rx="10" fill="#3f51b5"/>
+            <rect x="280" y="325" width="11" height="58" fill="#37474f"/><rect x="296" y="325" width="11" height="58" fill="#37474f"/>
+          </g>
+
+          <!-- 标注2：多边形 car -->
+          <g>
+            <polygon points="430,360 445,325 520,312 590,318 610,345 615,368 585,372 430,372"
+                     fill="rgba(82,196,26,0.12)" stroke="#52c41a" stroke-width="2.5"/>
+            <polygon points="450,352 460,330 520,322 575,327 595,348 596,360 570,362 450,362" fill="#607d8b" opacity=".85"/>
+            <circle cx="470" cy="368" r="13" fill="#263238"/><circle cx="565" cy="368" r="13" fill="#263238"/>
+            <rect x="430" y="292" width="64" height="20" fill="#52c41a"/>
+            <text x="436" y="306" font-size="12" fill="#fff" font-family="Segoe UI">car</text>
+            <circle cx="430" cy="360" r="4" fill="#fff" stroke="#52c41a" stroke-width="2"/>
+            <circle cx="520" cy="312" r="4" fill="#fff" stroke="#52c41a" stroke-width="2"/>
+            <circle cx="615" cy="368" r="4" fill="#fff" stroke="#52c41a" stroke-width="2"/>
+          </g>
+
+          <!-- 标注3：关键点 pose -->
+          <g stroke="#fa8c16" stroke-width="2" fill="#fa8c16">
+            <circle cx="120" cy="330" r="4.5"/><circle cx="108" cy="352" r="4"/><circle cx="132" cy="352" r="4"/>
+            <circle cx="120" cy="360" r="4"/><circle cx="106" cy="392" r="4"/><circle cx="134" cy="392" r="4"/>
+            <circle cx="104" cy="425" r="4"/><circle cx="136" cy="425" r="4"/>
+            <line x1="120" y1="330" x2="120" y2="360"/><line x1="120" y1="334" x2="108" y2="352"/><line x1="120" y1="334" x2="132" y2="352"/>
+            <line x1="120" y1="360" x2="106" y2="392"/><line x1="120" y1="360" x2="134" y2="392"/>
+            <line x1="106" y1="392" x2="104" y2="425"/><line x1="134" y1="392" x2="136" y2="425"/>
+          </g>
+          <rect x="86" y="300" width="118" height="20" fill="#fa8c16"/>
+          <text x="92" y="314" font-size="12" fill="#fff" font-family="Segoe UI">pose · 8 pts</text>
+        </svg>
+      </div>
+      <div class="crosshair-h"></div>
+      <div class="crosshair-v"></div>
+      <div class="coord-tip">x: 512, y: 289</div>
+    </div>
+    <!-- 画布控制条：翻页 + 缩放 -->
+    <div class="canvas-bar">
+      <div class="cbtn">◀ 上一张 <span class="kbd2">A</span></div>
+      <div class="page-ind"><b>198</b> / 520</div>
+      <div class="cbtn">下一张 ▶ <span class="kbd2">D</span></div>
+      <div class="csep"></div>
+      <div class="cbtn">🔍−</div>
+      <div class="zoom-val">87%</div>
+      <div class="cbtn">🔍+</div>
+      <div class="cbtn">⛶ 适应窗口 <span class="kbd2">F</span></div>
+      <div class="cbtn">1:1 <span class="kbd2">Ctrl+0</span></div>
+    </div>
+    </div>
+
+    <!-- 右侧面板组 -->
+    <div class="rightdock">
+      <!-- 类别 -->
+      <div class="dock" style="flex:0 0 auto;">
+        <div class="dock-head">类别 <span class="mini">数字键快速切换</span></div>
+        <div class="dock-body">
+          <div class="cls-item sel"><span class="key">1</span><span class="dot" style="background:#ff4d4f"></span>person<span class="cnt">128</span></div>
+          <div class="cls-item"><span class="key">2</span><span class="dot" style="background:#52c41a"></span>car<span class="cnt">96</span></div>
+          <div class="cls-item"><span class="key">3</span><span class="dot" style="background:#fa8c16"></span>pose<span class="cnt">41</span></div>
+          <div class="cls-item"><span class="key">4</span><span class="dot" style="background:#9254de"></span>traffic_light<span class="cnt">17</span></div>
+        </div>
+      </div>
+      <!-- 标注对象 -->
+      <div class="dock" style="flex:1 1 0;">
+        <div class="dock-head">标注对象 <span class="mini">本图 3 个</span></div>
+        <div class="dock-body">
+          <div class="obj-item sel"><span class="type">▭</span><span class="dot" style="background:#ff4d4f"></span>person<span class="eye">👁</span></div>
+          <div class="obj-item"><span class="type">⬠</span><span class="dot" style="background:#52c41a"></span>car<span class="eye">👁</span></div>
+          <div class="obj-item"><span class="type">✚</span><span class="dot" style="background:#fa8c16"></span>pose<span class="eye">👁</span></div>
+        </div>
+      </div>
+      <!-- 属性 -->
+      <div class="dock" style="flex:0 0 auto;">
+        <div class="dock-head">属性</div>
+        <div class="dock-body">
+          <div class="prop-grid">
+            <span>类别</span><span class="v">person</span>
+            <span>位置</span><span class="v">x:250 y:215 w:86 h:170</span>
+            <span>分组</span><span class="v">—</span>
+            <span>备注</span><span class="v" style="color:#999">双击添加…</span>
+          </div>
+        </div>
+      </div>
+      <!-- 文件列表 -->
+      <div class="dock" style="flex:1 1 0;">
+        <div class="dock-head">文件列表 <span class="mini">已标注 198 / 520</span></div>
+        <div class="dock-body">
+          <div class="file-item"><span class="thumb" style="background:linear-gradient(135deg,#7f9fc4,#5d6f57)"></span>000197.jpg<span class="st done">✓ 已标注</span></div>
+          <div class="file-item cur"><span class="thumb" style="background:linear-gradient(135deg,#8fb6d9,#77896b)"></span>000198.jpg<span class="st wip">● 标注中</span></div>
+          <div class="file-item"><span class="thumb" style="background:linear-gradient(135deg,#a8b6c9,#6d7a63)"></span>000199.jpg<span class="st todo">○ 未标注</span></div>
+          <div class="file-item"><span class="thumb" style="background:linear-gradient(135deg,#93a7bd,#66715c)"></span>000200.jpg<span class="st todo">○ 未标注</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 状态栏 -->
+  <div class="statusbar">
+    <span style="font-family:Consolas,monospace">x: 512, y: 289</span>
+    <span>1920 × 1080</span>
+    <span class="hint">提示：按住 Ctrl 拖动角点可等比调整</span>
+    <div class="prog"><span>198 / 520</span><div class="progbar"><i></i></div></div>
+  </div>
+</div>
+
+<script>
+  // 让 1400x860 的设计稿自适应窗口大小
+  function fit(){
+    const w = document.getElementById('win');
+    const s = Math.min(innerWidth/1420, innerHeight/880, 1);
+    w.style.transform = 'scale(' + s + ')';
+  }
+  addEventListener('resize', fit); fit();
+</script>
+</body>
+</html>

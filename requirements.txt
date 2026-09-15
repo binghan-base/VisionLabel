@@ -1,0 +1,10 @@
+# VisionLabel 第三方依赖
+# ======================
+# 推荐 Python：3.10+
+# 安装：pip install -r requirements.txt
+#
+# PySide6 是 Qt 官方 Python 绑定（Qt for Python）。
+# 项目使用 Qt Widgets / Graphics View / QtSvg。
+# 保持 >=6.6 是为了覆盖当前代码使用的 Qt 6 API；
+# main.py 对 Qt 6.8 才有的 setColorScheme() 已做 AttributeError 兼容。
+PySide6>=6.6

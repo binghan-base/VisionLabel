@@ -1,0 +1,64 @@
+{
+  "version": "0.1.0",
+  "imagePath": "img_1.png",
+  "imageWidth": 800,
+  "imageHeight": 600,
+  "shapes": [
+    {
+      "label": "label0",
+      "shape_type": "rect",
+      "points": [
+        [
+          100.4,
+          100.3
+        ],
+        [
+          300.1,
+          300.0
+        ]
+      ]
+    },
+    {
+      "label": "label1",
+      "shape_type": "rect",
+      "points": [
+        [
+          400.0,
+          200.1
+        ],
+        [
+          599.7,
+          399.9
+        ]
+      ]
+    },
+    {
+      "label": "label2",
+      "shape_type": "rect",
+      "points": [
+        [
+          200.3,
+          399.9
+        ],
+        [
+          400.0,
+          549.7
+        ]
+      ]
+    },
+    {
+      "label": "labelX",
+      "shape_type": "rect",
+      "points": [
+        [
+          150.3,
+          50.3
+        ],
+        [
+          350.1,
+          250.1
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+# Python 字节码 / 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 测试/工具缓存
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# 打包/构建产物
+build/
+dist/
+*.egg-info/
+
+# IDE 本机状态
+.idea/
+.vscode/
+
+# VisionLabel 运行日志
+crash.log
+
+# 操作系统杂项
+.DS_Store
+Thumbs.db
