@@ -7,7 +7,7 @@
 
 1. YOLO Detection
    - 仅 rect；
-   - 一张图片对应一个同名 .txt；
+   - 仅为存在同名标注 JSON 的图片生成 .txt；
    - 每行为：class_id cx cy w h，坐标均归一化到 0~1。
 
 2. COCO
@@ -56,6 +56,8 @@ def export_yolo_detection(
     """
     把 VisionLabel 的矩形标注导出为 YOLO Detection 格式。
 
+    仅导出存在对应 JSON 的图片；空 JSON 标注仍导出空 TXT，表示负样本。
+
     返回值：实际导出的矩形标注总数。
 
     关键转换：
@@ -73,6 +75,10 @@ def export_yolo_detection(
     count = 0
 
     for image_path in image_files:
+        # 没有 JSON 表示尚未标注，不能当作已确认无目标的负样本导出。
+        if not shapes_io.json_path_for(image_path).exists():
+            continue
+
         width, height = size_reader(image_path)
         if width <= 0 or height <= 0:
             # 图片损坏时跳过。更严格的检查可先运行 validation_service。
@@ -99,7 +105,7 @@ def export_yolo_detection(
                 f"{cx:.6f} {cy:.6f} {nw:.6f} {nh:.6f}"
             )
 
-        # 即使该图片没有矩形，也写出一个空 txt：这在 YOLO 数据集中代表负样本。
+        # 已有 JSON 但没有可导出的矩形时，保留空 txt 的负样本语义。
         (output_dir / f"{image_path.stem}.txt").write_text(
             "\n".join(lines),
             encoding="utf-8",
